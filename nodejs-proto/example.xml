@@ -1,0 +1,10 @@
+<?xml version="1.0"?>
+<box style="flex-direction: column">
+  <text style="display: none">This shouldn't be displayed</text>
+  <text>This is a simple calculator</text>
+  <input id="input" placeholder="input"/>
+  <text>+</text>
+  <input id="input2" placeholder="input2"/>
+  <button key="ctrl-b" onclick="$('#result').innerText = parseInt($('#input').value) + parseInt($('#input').value)">Button</button>
+  <text>Result: <text id="result">0000</text></text>
+</box>
