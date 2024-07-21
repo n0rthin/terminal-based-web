@@ -30,15 +30,6 @@ export function initInput() {
             process.stdout.write(ANSIES.ShowCursor);
             process.exit();
         }
-
-        if (key.sequence === "\u0009") {
-            //input.emit(
-            //console.log(str, key);
-        }
-
-        // User has triggered a keypress, now do whatever we want!
-        // ...
-
     });
 
     return { input: process.stdin };
