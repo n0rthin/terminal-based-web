@@ -40,7 +40,7 @@ export function createPainter(width, height) {
 }
 
 function paintNode(canvas, node, offsetTop, offsetLeft) {
-    //if (!node.dirty) return;
+    if (!node.dirty) return;
     node.dirty = false;
     node.yogaNode.markLayoutSeen();
 
