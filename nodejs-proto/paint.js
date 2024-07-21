@@ -7,18 +7,43 @@ const BoxDrawing = {
     BottomRightCorner: "\u2518",
 }
 
-export function paintDOM(dom, width, height) {
-    // use 1d array to improve performance
-    const canvas = new Array(height)
+const BoxDrawingThick = {
+    Horizontal: "\u2501",
+    Vertical: "\u2503",
+    TopLeftCorner: "\u250F",
+    TopRightCorner: "\u2513",
+    BottomLeftCorner: "\u2517",
+    BottomRightCorner: "\u251B",
+}
+
+function initCanvas(width, height) {
+    return new Array(height)
         .fill(null)
         .map(() => new Array(width).fill(" "));
 
-    paintNode(canvas, dom, 0, 0);
+}
 
-    return canvas.map(row => row.join("")).join("\n");
+export function createPainter(width, height) {
+    // use 1d array to improve performance
+    const canvas = initCanvas(width, height);
+
+    function paint(dom) {
+        paintNode(canvas, dom, 0, 0);
+        return canvas.map(row => row.join("")).join("\n");
+    }
+
+    return {
+        paint,
+        width,
+        height
+    }
 }
 
 function paintNode(canvas, node, offsetTop, offsetLeft) {
+    //if (!node.dirty) return;
+    node.dirty = false;
+    node.yogaNode.markLayoutSeen();
+
     const layout = node.getComputedLayout();
     const top = layout.top + offsetTop;
     const left = layout.left + offsetLeft;
@@ -28,6 +53,7 @@ function paintNode(canvas, node, offsetTop, offsetLeft) {
         right: node.computedStyleMap.borderRight === "yes",
         bottom: node.computedStyleMap.borderBottom === "yes",
         left: node.computedStyleMap.borderLeft === "yes",
+        thick: node.computedStyleMap.borderWidth === "thick",
     };
     const contentTop = top + border.top; // + padding;
     const contentLeft = left + border.left; // + padding;
@@ -53,44 +79,45 @@ function paintNode(canvas, node, offsetTop, offsetLeft) {
 }
 
 function paintBorder(border, canvas, layout, top, left) {
+    const boxDrawing = border.thick ? BoxDrawingThick : BoxDrawing;
     const paddingWidth = layout.width - border.left - border.right;
     const paddingHeight = layout.height - border.top - border.bottom;
 
     if (border.top) {
-        canvas[top].splice(left + border.left, paddingWidth, ...new Array(paddingWidth).fill(BoxDrawing.Horizontal));
+        canvas[top].splice(left + border.left, paddingWidth, ...new Array(paddingWidth).fill(boxDrawing.Horizontal));
     }
 
     if (border.bottom) {
         canvas[top + layout.height - 1]
-            .splice(left + border.left, paddingWidth, ...new Array(paddingWidth).fill(BoxDrawing.Horizontal));
+            .splice(left + border.left, paddingWidth, ...new Array(paddingWidth).fill(boxDrawing.Horizontal));
     }
 
     if (border.left) {
         for (let row = 0; row < paddingHeight; row++) {
-            canvas[top + border.top + row][left] = BoxDrawing.Vertical;
+            canvas[top + border.top + row][left] = boxDrawing.Vertical;
         }
     }
 
     if (border.right) {
         for (let row = 0; row < paddingHeight; row++) {
-            canvas[top + border.top + row][left + layout.width - 1] = BoxDrawing.Vertical;
+            canvas[top + border.top + row][left + layout.width - 1] = boxDrawing.Vertical;
         }
     }
 
     if (border.top && border.left) {
-        canvas[top][left] = BoxDrawing.TopLeftCorner;
+        canvas[top][left] = boxDrawing.TopLeftCorner;
     }
 
     if (border.top && border.right) {
-        canvas[top][left + layout.width - 1] = BoxDrawing.TopRightCorner;
+        canvas[top][left + layout.width - 1] = boxDrawing.TopRightCorner;
     }
 
     if (border.right && border.bottom) {
-        canvas[top + layout.height - 1][left + layout.width - 1] = BoxDrawing.BottomRightCorner;
+        canvas[top + layout.height - 1][left + layout.width - 1] = boxDrawing.BottomRightCorner;
     }
 
     if (border.left && border.bottom) {
-        canvas[top + layout.height - 1][left] = BoxDrawing.BottomLeftCorner;
+        canvas[top + layout.height - 1][left] = boxDrawing.BottomLeftCorner;
     }
 }
 

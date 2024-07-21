@@ -10,6 +10,8 @@ function applyCSS(root, css) {
 }
 
 function applyInlineCSS(node) {
+    if (!node.dirty) return;
+
     if (node.attributes.style) {
         const inlineComputedStyleMap = parseInlineCSS(node.attributes.style);
         node.computedStyleMap.set(inlineComputedStyleMap);
@@ -41,6 +43,7 @@ export class ComputedStyleMap {
         this.borderRight = "";
         this.borderBottom = "";
         this.borderLeft = "";
+        this.borderWidth = "";
         this.color = "";
         this.display = "";
         this.flexDirection = "";
